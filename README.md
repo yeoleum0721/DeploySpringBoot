@@ -1,0 +1,39 @@
+#### 로컬에서 DB와 SpringBoot 2개의 컨테이너 실행하기
+
+#### Network 생성하기
+* docker network 목록 확인하기
+    ```
+    docker network ls
+    
+    ```
+* docker network 생성하기
+    ```
+    docker network create --driver bridge msanet
+    ```
+* MariaDB Run
+```
+    docker run --name db-svc -d \
+    --net msanet \
+    --net-alias=db-svc \
+    -p 3306:3306 \
+    -e MYSQL_ROOT_PASSWORD='maria' \
+    -e MYSQL_DATABASE='boot_db' \
+    -e MYSQL_USER='boot' \
+    -e MYSQL_PASSWORD='boot' \
+    -e MYSQL_ROOT_HOST='%' \
+    mariadb:10.11.8 \
+    --character-set-server=utf8mb4 \
+    --collation-server=utf8mb4_unicode_ci
+```
+
+* SpringBoot Run
+    - image가 local에 없으면 dockerhub에서 가져옴
+``` 
+docker run --name myboot-svc -d -p 8080:8080 --net msanet --net-alias=myboot-svc \
+-e DB_HOST='db-svc' \
+-e DB_PORT='3306' \
+-e DB_DATABASE='boot_db' \
+-e DB_USERNAME='boot' \
+-e DB_PASSWORD='boot' \
+yeoleum/springbootreactjs:0.1
+```
